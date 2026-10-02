@@ -1,0 +1,47 @@
+ORSAYTUBE MOBİL — SÜRÜM 3.0
+============================
+
+Bu uygulama, aşağıdaki açık kaynak projelerinin sistemlerini
+kullanarak hazırlanmıştır:
+
+  diekaiju/localtube  (GPLv3)
+  https://github.com/diekaiju/localtube
+  - Yerel HTTP sunucusu + WebView mimarisi (LocalHttpServer,
+    ServerService, ön plan servis yaklaşımı)
+  - Video akış vekilinin istemci-eşleşmeli User-Agent yöntemi
+    (googlevideo URL'sindeki c= parametresine göre UA seçimi)
+  - "YouTube deneyimini kendin barındır" fikri
+  - localtube, motor olarak bir NewPipeExtractor forkunu gömülü
+    kullanır; v3.0 aynı sistemi uygular
+
+  NewPipe Extractor — TeamNewPipe (GPLv3)
+  https://github.com/TeamNewPipe/NewPipeExtractor
+  - v3.0'da GERÇEK NewPipe Extractor (master) derlenip
+    gömülüdür: arama ve akış çözümlemesi bu motorla yapılır
+  - YouTube akış URL'lerinin imza (sig) ve n-parametre
+    çözümlemesi (Rhino JavaScript motoruyla) bu motorun
+    özelliğidir — v2'nin video oynamama sorununun çözümü
+  - Bağımlılıklar: jsoup, Rhino, nanojson, protobuf-javalite,
+    jsr305 (hepsi APK içinde)
+
+  NewPipe e.V. ve katkıda bulunanlara teşekkürler.
+
+  Piped (GPLv3/AGPL) — koyulaştırılmış API örnekleri
+  - api.piped.private.coffee (yedek arama/trend/akış kaynağı)
+
+TEŞEKKÜRLER
+-----------
+diekaiju'a, TeamNewPipe topluluğuna ve Piped geliştiricilerine,
+izlemeyi kısıtlamasız ve merkeziyetsiz kılan emekleri için.
+
+LİSANS DURUMU
+-------------
+Gömülü NewPipe Extractor GPLv3 lisanslıdır; bu uygulama da
+GPLv3 ruhunda, credit ve bu not korunarak dağıtılır.
+Uygulamayı kullanmak, kopyalamak ve değiştirmek serbesttir;
+değiştirilmiş sürümlerde bu not ve credit korunmalıdır.
+
+Sunucu (ServerSocket HTTP + Range/HLS vekil), WebView arayüzü
+ve yerel yedek zincirler (innertube/Piped) bu proje için
+sıfırdan yazılmıştır; akış/arama çözümlemesi gömülü NewPipe
+Extractor motoruyla yapılır.

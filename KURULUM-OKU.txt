@@ -1,0 +1,141 @@
+================================================================
+ ORSAYTUBE MOBİL v4.6 — KURULUM VE KULLANIM REHBERİ
+================================================================
+
+
+BU SÜRÜM NEDİR? (OrsayTube v4.6)
+----------------------------------------------------------------
+v4.6 ile AYNI kod — yalnızca iki görsel değişiklik yapıldı:
+  1) LOGO: eski ikondaki üçgen köşe noktaları ve sağ üstteki beyaz
+     nokta kaldırıldı. Telefon, Android TV ve Samsung widget
+     ikonları artık temiz (koyu zemin + kırmızı oynat üçgeni).
+  2) İSİM: Uygulama adı OrsayTube (etiket, bildirim, arayüz metinleri,
+     widget adı). Teknik tanımlayıcılar (paket adı, imza, sunucu
+     uçları) aynı kaldı.
+İşlevsel HİÇBİR değişiklik yok. Aynı imzayla derlendi — eski
+sürümün ÜSTÜNE kurulur (versionCode 48: hem 4.6'nın hem 4.7'nin
+üstüne geçer, veriler korunur).
+
+NEDEN v4.6? (v4.5 geri bildiriminizin SONUCU)
+----------------------------------------------------------------
+Geri bildiriminiz: "HLS bu TV'de hiç çalışmadı, boşa uğraşmayın —
+TV tarafında MP4 ya da desteklediği biçimle devam edin. Ayrıca TV
+arayüzündeki üç butonun yazıları header ile birlikte kayıyor."
+Üç kök neden bulundu ve giderildi:
+
+  1) TV'DE 720p MP4 (ANA DÜZELTME): YouTube, ANDROID_VR/IOS
+     istemcilerine artık imzasız 720p muxed VERMİYOR (test edildi —
+     yalnızca itag 18 = 360p geliyor). Bu yüzden TV 360p'te
+     kalıyordu. Sunucu v4.6'da WEB_EMBEDDED_PLAYER istemcisinin
+     İMZALI (signatureCipher) 720p biçimini NewPipe'in JS motoruyla
+     (Rhino — gömülü) çözer ve itag 22 (720p MP4) kalite listesine
+     girer. Kalite listesi: 720p MP4 → 360p MP4 → LBRY yedek →
+     HLS (en son, deneysel). Varsayılan = EN İYİ MP4.
+  2) HLS KULLANIMDAN ÇIKARILDI (TV): TV tarayıcınız HLS
+     oynatmıyor (v4.5'te denendi). HLS kaynakları artık TV'de
+     varsayılan DEĞİL — yalnız kalite menüsünde en sonda "bu
+     TV'de çalışmayabilir" notuyla durur. Telefonda (MSE/hls.js
+     var) HLS hâlâ ilk tercih olarak çalışır.
+  3) TV ARAYÜZÜ KAYMASI (üç buton + header): araç çubuğu
+     (#tools) içerik katmanından #app DÜZEYİNE taşındı (kaydırma
+     artık etkilemez); butonlar inline-block yerine float (eski
+     WebKit boşluk düğümleri kaydırıyordu); ölçekleme TEK oranla
+     yapılır ve 1280x720 ekranda hiç transform uygulanmaz (eski
+     WebKit ölçek sonrası metni bayat konumda boyuyordu); sayfa
+     kaydırması anında geri alınır; ızgara geçiş animasyonu
+     kaldırıldı (bayat boya kaynağıydı).
+
+KURULUM (mobil)
+----------------------------------------------------------------
+1) OrsayTube-Mobil-v4.6.apk dosyasını telefona indirin
+2) v4.5 kuruluysa ÜSTÜNE kurun (aynı imza, veriler korunur)
+3) Dosyaya dokunun → "Bilinmeyen kaynaklardan kurulum" izni verin
+4) Uygulama adı: "OrsayTube Mobil" (v4.6)
+
+TELEVİZYON KURULUMU (dört yol)
+----------------------------------------------------------------
+YOL A — Samsung 2012-2013 Smart TV (Orsay) — PC'den (EN SAĞLAM):
+  1) OrsayTube-TV-Kurulum-Paketi-v1.4.zip'i PC'de açın
+  2) İçindeki LOCALTUBETV.zip + widgetlist.xml dosyalarını
+     kurucu programınızın (SammyGO vb.) sunacağı klasöre koyun
+  3) TV'de Smart Hub → "develop" hesabıyla girin → Gelişme →
+     Sunucu IP'si = PC'nizin IP'si → "Kullanıcı uygulamalarını
+     senkronla". Ayrıntılar paketin içindeki KURULUM-OKU.txt'de.
+  4) Widget açılınca telefon adresini ister (ör. 192.168.1.5:8080)
+     — telefonda OrsayTube açıkken girin.
+     NOT: widget v1.4, v4.6 TV arayüzünü (MP4-önce + kayma
+     düzeltmeleri) içerir.
+
+YOL B — Samsung "Gelişme" ile TELEFONDAN: sunucu doğru biçimde
+     widgetlist.xml + LOCALTUBETV.zip verir: TV'de develop hesabı
+     → Gelişme → Sunucu IP = TELEFON-IP → senkronla. (Bazı TV'ler
+     yalnız 80. porttan sorar; telefon sunucusu 8080'dedir — o
+     durumda YOL A'yı kullanın.)
+
+YOL C — Herhangi akıllı TV tarayıcısı (her TV'de çalışır, ÖNERİLEN):
+  1) Telefonda OrsayTube Mobil v4.6'yı açın
+  2) TV'nin internet tarayıcısını açın: http://TELEFON-IP:8080
+  3) TV tarayıcısı olduğu otomatik algılanır → 10-foot TV
+     arayüzü açılır; kumanda ile gezinin.
+     · Renkli tuşlar çalışmıyorsa: YUKARI (araç çubuğu) ve
+       oynatıcıda AŞAĞI (butonlar) + sayı tuşlarını kullanın
+     · "3" tuşu: yardım ekranı (tüm tuşlar listelenir)
+     · GERİ tuşu videoyu/listeyi kapatır
+
+YOL D — Android TV / Google TV (APK ile):
+  1) TV'nin tarayıcısından indirin: http://TELEFON-IP:8080/localtube-tv.apk
+     (OrsayTube TV 1.3 — arayüzü sunucudan alır, v4.6 otomatik)
+  2) İnen APK'yı TV'de açın → "bilinmeyen kaynaklar"a izin verin
+  3) OrsayTube TV uygulaması telefonu aynı Wi-Fi'de otomatik bulur
+     (UDP keşif); bulamazsa telefon IP'sini elle girin.
+
+DOĞRULAMA (30 saniye)
+----------------------------------------------------------------
+Mobil: Tanılama ekranı → [3/5] "kaynak: newpipe", [4/5] HTTP 206
+TV   : video açın → oynatıcı altındaki "Kaynak 1/N · 720p"
+       yazmalı (önceki sürümde 360p kalıyordu). Kalite menüsünde
+       (1 / MAVİ tuş) MP4 kaliteleri BAŞTA, HLS en sonda.
+       Üç araç çubuğu butonu (Ara/Trendler/Yardım) YUKARI ile
+       odaklanınca yazıları kaymamalı.
+NOT : 720p WEB çözümlemesi ilk açılışta 3-6 sn ekleyebilir
+     (imza + n-parametresi Rhino'da çözülür); video 30 dk
+     önbellekte kalır — tekrar açışlar hızlıdır. Telefonun
+     IP'sine YouTube bot bayrağı vurursa 360p'ye düşer
+     (Wi-Fi'ye geçince toparlanır).
+
+KULLANIM
+----------------------------------------------------------------
+· Arama: TV'de "1" tuşu veya YUKARI → Ara; mobilde üstteki kutu
+· Kalite: oynatıcıda AŞAĞI → buton satırı → "Kalite" (veya "1")
+· Hız: oynatıcıda AŞAĞI → "Hız" (veya "2") — 0.75× … 2×
+· Benzer videolar: oynatıcıda AŞAĞI → "Benzer" (veya "3");
+  video bitince liste otomatik açılır
+· Tam ekran: oynatıcıda AŞAĞI → "Tam Ekran" (veya "4")
+· GERİ (TV): oynatıcıda videoyu kapatır; ızgarada bir kez
+  yutulur, ikinci basış sayfadan çıkar
+· Sık oynatılan video 30 dk önbellekte kalır; "Yeniden dene"
+  taze adres çeker
+
+VİDEO OYNAMAZSA
+----------------------------------------------------------------
+1) Tanılama ekranını çalıştırıp raporu okuyun:
+   · "bot bayrağı / oturum duvarı" → Wi-Fi ağına geçip deneyin
+   · "web720: WEB_EMBEDDED ..." satırı 720p denemesinin sonucunu
+     gösterir (yanıt yoksa VR 360p ile devam edilir)
+2) Oynatıcıda OK → yeniden çözümlenir
+3) "Dış oynatıcıda aç (VLC)" düğmesi (mobil) yedek çıkıştır
+
+MİMARİ + KREDİ
+----------------------------------------------------------------
+Telefonda gömülü HTTP sunucusu (8080-8090) + WebView; motor:
+NewPipe Extractor (TeamNewPipe, GPLv3) — imza/n-parametre
+çözümlemesi Rhino ile. v4.3 yaması (çoklu istemci dayanıklılığı)
+korundu. v4.6: WEB_EMBEDDED_PLAYER imzalı 720p zenginleştirmesi
+(motorun YoutubeStreamHelper + YoutubeJavaScriptPlayerManager
+API'leriyle). Trendler: 4 canlı kiosk paralel. Mimari ilhamı:
+diekaiju/localtube (GPLv3). Yedek zincir: innertube
+(ANDROID_VR + IOS 21.03.2) → Piped örnekleri.
+TV APK: Android TV WebView istemcisi (v1.3, arayüz sunucudan).
+Samsung widget: Orsay tek dosya paketi (v1.4 — v4.6 arayüzü).
+Tüm iletişim yerel ağda kalır; YouTube'a istekler telefonun
+kendi IP'sinden gider (NewPipe uygulamasının modeli).

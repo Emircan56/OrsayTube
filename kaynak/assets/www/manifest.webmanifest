@@ -1,0 +1,16 @@
+{
+  "name": "OrsayTube Mobil",
+  "short_name": "OrsayTube",
+  "description": "Yerel sunucu tabanlı YouTube arayüzü — diekaiju/localtube ilhamıyla",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#0f0f0f",
+  "icons": [
+    {
+      "src": "/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,615 @@
+/* OrsayTube TV v4.6 — 10-foot arayüz
+ * 1280x720 sabit tasarim + JS olcegiyle her ekrana uyum.
+ * Flexbox/calc KULLANILMAZ — eski TV WebKit guvenli.
+ * Amaclar: kayma yok (butun boyutlar sabit), kumanda ile gezinme,
+ * tam ekran oynatici, kumanda erisimli kontroller.
+ * v4.6: #tools #app duzeyinde sabit; .tool float (inline-block bosluk
+ * dugumleri yok); #grid transition YOK (bayat metin boyasi); html+body
+ * overflow hidden (D-pad sayfa kaydirmasi engellenir).
+ */
+
+* { margin: 0; padding: 0; }
+
+html, body {
+  background: #000;
+  color: #eee;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.hidden { display: none !important; }
+
+#app {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 720px;
+  background: #0d0d0d;
+  overflow: hidden;
+  -webkit-transform-origin: 0 0;
+  transform-origin: 0 0;
+}
+
+/* ---------- ust cubuk ---------- */
+#header {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 84px;
+  background: #161616;
+  border-bottom: 2px solid #292929;
+}
+#logo {
+  position: absolute;
+  left: 30px; top: 20px;
+  font-size: 34px;
+  font-weight: bold;
+  color: #f4f4f4;
+  letter-spacing: 1px;
+}
+#logo .tvtag {
+  color: #e62117;
+  font-size: 23px;
+  margin-left: 6px;
+}
+#subtitle {
+  position: absolute;
+  left: 305px; top: 30px;
+  font-size: 24px;
+  color: #999;
+  max-width: 480px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+#hright {
+  position: absolute;
+  right: 26px; top: 28px;
+  font-size: 22px;
+  color: #888;
+}
+#clock { margin-right: 24px; color: #bbb; }
+.dot {
+  display: inline-block;
+  width: 16px; height: 16px;
+  -webkit-border-radius: 8px;
+  border-radius: 8px;
+  margin-right: 8px;
+}
+.dot.on  { background: #2ecc40; }
+.dot.off { background: #c0392b; }
+
+/* ---------- icerik / izgara ---------- */
+#content {
+  position: absolute;
+  left: 0; top: 84px;
+  width: 1280px; height: 596px; /* 720 - 84 - 40 */
+  overflow: hidden;
+}
+/* v4.6: araç çubuğu — #app DÜZEYİNDE (content DIŞINDA). D-pad yukarı
+ * ile erişilir (renkli tuş yedek). İçerik kaydığında/meta yeniden
+ * boyandığında düğme metinleri header ile birlikte KAYMAZ. */
+#tools {
+  position: absolute;
+  left: 24px; top: 94px;
+  width: 1232px; height: 58px;
+  z-index: 5;
+}
+.tool {
+  float: left;
+  width: 210px; height: 54px;
+  margin-right: 14px;
+  background: #1d1d1f;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  color: #ccc;
+  font-size: 24px;
+  text-align: center;
+  line-height: 54px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.tool.focus {
+  background: #e62117;
+  color: #fff;
+  border: 3px solid #fff;
+  -webkit-box-shadow: 0 0 16px rgba(230,33,23,.9);
+  box-shadow: 0 0 16px rgba(230,33,23,.9);
+}
+#grid {
+  position: absolute;
+  left: 24px; top: 84px;
+  width: 1232px;
+  /* v4.6: transition KALDIRILDI — eski TV WebKit'te geçiş sırasında
+   * metin bayat konumda boyanıyor (kayma izlenimi). Anlık kaydırma. */
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+#hintbar {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 1280px; height: 40px;
+  background: #111;
+  color: #777;
+  font-size: 19px;
+  line-height: 40px;
+  padding-left: 30px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* ---------- kart (5 sutun) ----------
+ * sutun 232px + 14px bosluk = 246; 5 sutun = 1230 <= 1232 (kayma yok) */
+.card {
+  display: inline-block;
+  vertical-align: top;
+  width: 232px;
+  margin: 0 14px 30px 0;
+  font-size: 20px;
+  color: #ddd;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.card .thumb {
+  position: relative;
+  width: 232px; height: 130px;
+  background: #222;
+  overflow: hidden;
+  border: 3px solid #1d1d1d;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+}
+.card .thumb img {
+  width: 232px; height: 130px;
+  border: 0;
+  background: #222;
+}
+.card .dur {
+  position: absolute;
+  right: 6px; bottom: 6px;
+  background: rgba(0,0,0,.85);
+  color: #fff;
+  font-size: 17px;
+  padding: 2px 7px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.card .ttl {
+  margin-top: 10px;
+  height: 54px;           /* tam 2 satir — yuklenince kayma olmaz */
+  overflow: hidden;
+  font-size: 21px;
+  line-height: 27px;
+  color: #eee;
+}
+.card .by {
+  margin-top: 4px;
+  height: 22px;
+  font-size: 18px;
+  color: #999;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* odak (kumanda secimi) */
+.card.focus .thumb {
+  border: 4px solid #e62117;
+  -webkit-box-shadow: 0 0 18px rgba(230,33,23,.8);
+  box-shadow: 0 0 18px rgba(230,33,23,.8);
+}
+.card.focus .ttl { color: #fff; }
+.card.focus .by { color: #ccc; }
+
+/* ---------- oynatici (tam ekran) ---------- */
+#player {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 720px;
+  background: #000;
+  z-index: 50;
+}
+#tvvideo {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 720px;
+  background: #000;
+}
+#pinfo {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px;
+  padding: 26px 34px;
+  background: -webkit-linear-gradient(top, rgba(0,0,0,.9), rgba(0,0,0,0));
+  background: linear-gradient(top, rgba(0,0,0,.9), rgba(0,0,0,0));
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: opacity .3s;
+  transition: opacity .3s;
+}
+#ptitle {
+  font-size: 30px;
+  color: #fff;
+  font-weight: bold;
+  max-width: 1100px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#pauthor {
+  margin-top: 8px;
+  font-size: 22px;
+  color: #bbb;
+}
+
+#pstatus {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 720px;
+  z-index: 55;
+  background: transparent;
+}
+#pstext {
+  position: absolute;
+  left: 0; top: 340px;
+  width: 1280px;
+  text-align: center;
+  font-size: 26px;
+  color: #ffd479;
+  text-shadow: 0 2px 6px #000, 0 0 12px rgba(0,0,0,.9);
+}
+#pstatus.spin::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 620px; top: 280px;
+  width: 40px; height: 40px;
+  border: 5px solid rgba(255,255,255,.2);
+  border-top-color: #fff;
+  -webkit-border-radius: 20px;
+  border-radius: 20px;
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+@-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#perr {
+  position: absolute;
+  left: 240px; top: 190px;
+  width: 800px;
+  background: rgba(15,15,15,.95);
+  border: 2px solid #e62117;
+  -webkit-border-radius: 12px;
+  border-radius: 12px;
+  padding: 40px 44px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  z-index: 60;
+}
+.perrbig {
+  font-size: 44px;
+  color: #e62117;
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+#perrtext {
+  font-size: 24px;
+  color: #f0a3ad;
+  line-height: 1.5;
+}
+.perrhint {
+  margin-top: 22px;
+  font-size: 19px;
+  color: #888;
+}
+
+/* alt kontroller — kumanda ile yonetilir */
+#pcontrols {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 1280px;
+  padding: 18px 34px 22px 34px;
+  background: -webkit-linear-gradient(top, rgba(0,0,0,0), rgba(0,0,0,.92));
+  background: linear-gradient(top, rgba(0,0,0,0), rgba(0,0,0,.92));
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: opacity .3s;
+  transition: opacity .3s;
+}
+#prow {
+  position: relative;
+  width: 1212px; height: 44px;
+}
+#ppause {
+  position: absolute;
+  left: 0; top: 6px;
+  width: 30px; height: 32px;
+  background: #fff;
+  -webkit-clip-path: none;
+}
+#ppause.play { /* ucgen */
+  background: transparent;
+  border-left: 0;
+  width: 0; height: 0;
+  border-top: 16px solid transparent;
+  border-bottom: 16px solid transparent;
+  border-left: 26px solid #fff;
+  border-right: 0;
+}
+#ppause.pause {
+  background: transparent;
+  width: 26px; height: 32px;
+  border-left: 9px solid #fff;
+  border-right: 9px solid #fff;
+}
+#ptime, #pdur {
+  position: absolute;
+  top: 7px;
+  font-size: 22px;
+  color: #ddd;
+  font-weight: bold;
+}
+#ptime { left: 52px; }
+#pdur { right: 0; }
+#plive {
+  position: absolute;
+  right: 0; top: 7px;
+  font-size: 20px;
+  color: #e62117;
+  font-weight: bold;
+}
+#pbar {
+  position: absolute;
+  left: 150px; right: 150px;
+  top: 18px;
+  height: 12px;
+  background: #333;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+}
+#pcur {
+  position: absolute;
+  left: 0; top: 0;
+  width: 0; height: 12px;
+  background: #e62117;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  z-index: 3; /* tampon (pbuf) USTUNE cizilsin */
+}
+/* oynatma kafası (kumanda ile konum göstergesi) */
+#pcur::after {
+  content: '';
+  position: absolute;
+  right: -9px; top: -6px;
+  width: 24px; height: 24px;
+  background: #fff;
+  -webkit-border-radius: 12px;
+  border-radius: 12px;
+  -webkit-box-shadow: 0 0 8px rgba(255,255,255,.8);
+  box-shadow: 0 0 8px rgba(255,255,255,.8);
+}
+#pbuf {
+  position: absolute;
+  left: 0; top: 0;
+  width: 0; height: 12px;
+  background: #555;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+}
+#pquality {
+  margin-top: 10px;
+  font-size: 20px;
+  color: #999;
+  height: 24px;
+}
+
+/* v4.3: ekran üstü D-pad oynatıcı butonları */
+#pbtns {
+  position: relative;
+  width: 1212px;
+  margin-top: 14px;
+  height: 60px;
+}
+.pbtn {
+  display: inline-block;
+  vertical-align: top;
+  width: 139px; height: 54px;
+  margin-right: 8px;
+  background: rgba(30,30,32,.9);
+  border: 2px solid #333;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  color: #ddd;
+  font-size: 20px;
+  text-align: center;
+  line-height: 54px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.pbtn.focus {
+  background: #e62117;
+  border: 3px solid #fff;
+  color: #fff;
+  -webkit-box-shadow: 0 0 16px rgba(230,33,23,.9);
+  box-shadow: 0 0 16px rgba(230,33,23,.9);
+}
+
+#pinfo.hide, #pcontrols.hide { opacity: 0; }
+
+/* kalite / benzer listesi */
+#poverlay {
+  position: absolute;
+  right: 0; top: 0;
+  width: 560px; height: 720px;
+  background: rgba(10,10,10,.96);
+  border-left: 2px solid #292929;
+  z-index: 65;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#pohead {
+  padding: 26px 30px 14px 30px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+}
+#polist {
+  position: absolute;
+  left: 0; top: 90px;
+  width: 560px; height: 560px;
+  overflow: hidden;
+}
+.pitem {
+  width: 500px;
+  margin: 0 30px 8px 0;
+  padding: 14px 18px;
+  -webkit-border-radius: 8px;
+  border-radius: 8px;
+  font-size: 21px;
+  color: #ccc;
+  background: #161616;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.pitem .pt2 {
+  font-size: 17px;
+  color: #777;
+  margin-top: 4px;
+  height: 20px;
+  overflow: hidden;
+}
+.pitem.focus {
+  background: #2c1518;
+  border: 3px solid #e62117;
+  color: #fff;
+  -webkit-box-shadow: 0 0 14px rgba(230,33,23,.6);
+  box-shadow: 0 0 14px rgba(230,33,23,.6);
+}
+#pohint {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 560px; height: 46px;
+  line-height: 46px;
+  padding-left: 30px;
+  font-size: 18px;
+  color: #777;
+  background: #0d0d0d;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* ---------- arama klavyesi ---------- */
+#keyboard {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 720px;
+  background: rgba(8,8,8,.97);
+  z-index: 70;
+}
+#kbhead {
+  position: absolute;
+  left: 90px; top: 60px;
+  width: 1100px;
+}
+#kbtitle {
+  font-size: 26px;
+  color: #888;
+}
+#kbquery {
+  margin-top: 16px;
+  width: 1100px; height: 74px;
+  background: #141414;
+  border: 3px solid #2c2c2c;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  font-size: 32px;
+  color: #fff;
+  line-height: 70px;
+  padding: 0 26px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#kgrid {
+  position: absolute;
+  left: 90px; top: 220px;
+  width: 1100px;
+}
+.krow { width: 1100px; height: 84px; }
+.kkey {
+  display: inline-block;
+  vertical-align: top;
+  width: 92px; height: 72px;
+  margin-right: 12px;
+  margin-bottom: 12px;
+  background: #1d1d1f;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  color: #eee;
+  font-size: 28px;
+  text-align: center;
+  line-height: 72px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.kkey.wide { width: 188px; font-size: 22px; color: #bbb; }
+.kkey.action { background: #7d1220; color: #fff; }
+.kkey.focus {
+  background: #e62117;
+  color: #fff;
+  border: 3px solid #fff;
+  -webkit-box-shadow: 0 0 16px rgba(230,33,23,.9);
+  box-shadow: 0 0 16px rgba(230,33,23,.9);
+}
+#kbhint {
+  position: absolute;
+  left: 90px; bottom: 36px;
+  width: 1100px;
+  font-size: 19px;
+  color: #777;
+}
+
+/* ---------- yardim ---------- */
+#help {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 720px;
+  background: rgba(8,8,8,.97);
+  z-index: 80;
+}
+#helpbox {
+  position: absolute;
+  left: 140px; top: 70px;
+  width: 1000px;
+}
+#helptitle {
+  font-size: 32px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 30px;
+}
+.hrow {
+  width: 1000px;
+  height: 52px;
+  line-height: 52px;
+  font-size: 22px;
+  color: #ccc;
+  border-bottom: 1px solid #222;
+}
+.hrow .hk {
+  display: inline-block;
+  width: 250px;
+  color: #e62117;
+  font-weight: bold;
+}
+#helpnote {
+  margin-top: 30px;
+  font-size: 19px;
+  color: #888;
+  line-height: 1.6;
+}

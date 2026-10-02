@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0f0f">
+<title>OrsayTube Mobil</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/img/icon-512.png">
+<link rel="apple-touch-icon" href="/img/icon-512.png">
+<link rel="stylesheet" href="/css/app.css?v=46">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#/" id="brandLink" aria-label="Ana sayfa">
+    <span class="brand-logo">▶</span>
+    <span class="brand-name">OrsayTube</span>
+  </a>
+  <form class="searchform" id="searchForm" autocomplete="off">
+    <input type="search" id="searchInput" placeholder="Ara…" enterkeyhint="search" aria-label="Video ara">
+    <button type="submit" class="searchbtn" aria-label="Ara">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+    </button>
+  </form>
+  <nav class="topnav" id="topNav" aria-label="Menü">
+    <a href="#/" data-nav="home">Ana Sayfa</a>
+    <a href="#/history" data-nav="history">Geçmiş</a>
+    <a href="#/diag" data-nav="diag">Tanılama</a>
+    <a href="#/about" data-nav="about">Hakkında</a>
+  </nav>
+</header>
+
+<div class="serverbar" id="serverBar">
+  <span class="dot" id="serverDot"></span>
+  <span id="serverText">Sunucuya bağlanılıyor…</span>
+</div>
+
+<main id="view" class="view" aria-live="polite"></main>
+
+<footer class="foot">
+  <span>OrsayTube Mobil v4.2 · <a href="#/about">diekaiju/localtube</a> (GPLv3) ilhamıyla</span>
+</footer>
+
+<script src="/js/app.js?v=46"></script>
+</body>
+</html>

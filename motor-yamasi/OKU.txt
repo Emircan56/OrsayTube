@@ -1,0 +1,7 @@
+v4.3 motor yamasi (YoutubeStreamExtractor.java):
+- fetchAndroidClient istisnasi artik OLUmCUl degil; yakalanir
+- ANDROID reddedilirse IOS + VISIONOS + WEB istemcileri denenir
+- Hicbir istemci streamingData vermezse orijinal hata firlatilir
+- setStreamType null-guvenli hale getirildi
+Derleme: javac --release 11 -cp <jar> tek dosya; jar uf ile guncelle.
+Ayrinti: KURULUM-OKU.txt "NEDEN v4.3" bolumu.

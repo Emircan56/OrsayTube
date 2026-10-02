@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>OrsayTube TV</title>
+<!-- v1.3: Orsay TV betikleri — WIDGET ortaminda $MANAGER_WIDGET gercek
+     yola çözülür; TV tarayicisinda/PC'de 404 verir ve sessizce atlanir -->
+<script type="text/javascript" src="$MANAGER_WIDGET/Common/API/TVKeyValue.js"></script>
+<script type="text/javascript" src="$MANAGER_WIDGET/Common/API/Widget.js"></script>
+<link rel="stylesheet" href="/css/tv.css?v=47">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ ANA IZGARA ============ -->
+  <div id="header">
+    <div id="logo">OrsayTube <span class="tvtag">TV</span></div>
+    <div id="subtitle">Trendler</div>
+    <div id="hright">
+      <span id="clock">--:--</span>
+      <span id="dot" class="dot off"></span>
+      <span id="statusTxt">Bağlanıyor</span>
+    </div>
+  </div>
+
+  <!-- v4.3: araç çubuğu — renkli tuşlar tarayıcı tarafından yutulsa bile
+       D-pad ile (yukarı basınca) tüm işlevlere erişilir.
+       v4.6: #app DÜZEYİNE TAŞINDI (content yerine) — metinleri artık
+       içerik kaydırmasından/hatalı katman boyamadan etkilenmez, header
+       ile birlikte KAYMAZ. -->
+  <div id="tools">
+    <div class="tool" id="tool0">Ara</div>
+    <div class="tool" id="tool1">Trendler</div>
+    <div class="tool" id="tool2">Yardım</div>
+  </div>
+
+  <div id="content">
+    <div id="grid"></div>
+  </div>
+
+  <div id="hintbar">OK: oynat &nbsp;·&nbsp; YUKARI: araç çubuğu &nbsp;·&nbsp; Oynatıcıda AŞAĞI: kontroller &nbsp;·&nbsp; 1: ara · 2: trendler · 3: yardım</div>
+
+  <!-- ============ OYNATICI (tam ekran) ============ -->
+  <!-- v4.4: autoplay KALDIRILDI — eski TV WebKit'lerinde kapatma sonrası
+       load() videoyu yeniden oynatıyordu. Oynatma artık yalnızca
+       applySource() içindeki play() çağrısıyla başlar. -->
+  <div id="player" class="hidden">
+    <video id="tvvideo" width="1280" height="720"></video>
+
+    <!-- v1.3: Orsay SEF oynatıcı eklentisi — widget ortaminda varsa HLS
+         kaynaklari TV'nin KENDI oynatici motoruyla çalinar (m3u8 yerel
+         desteklenmese bile). Video ayri düzlemde görünür, HTML üstte kalir.
+         Tarayicida bilinmeyen classid → görünmez ve zararsız. -->
+    <object id="pluginPlayer" border="0" classid="clsid:SAMSUNG-INFOLINK-PLAYER"></object>
+
+    <div id="pinfo">
+      <div id="ptitle"></div>
+      <div id="pauthor"></div>
+    </div>
+
+    <div id="pstatus" class="hidden"><span id="pstext">Yükleniyor…</span></div>
+
+    <div id="perr" class="hidden">
+      <div class="perrbig">!</div>
+      <div id="perrtext">Video açılamadı.</div>
+      <div class="perrhint">OK: tekrar dene &nbsp;·&nbsp; GERİ: listeye dön</div>
+    </div>
+
+    <div id="pcontrols">
+      <div id="prow">
+        <div id="ppause"></div>
+        <div id="ptime">00:00</div>
+        <div id="pbar"><div id="pbuf"></div><div id="pcur"></div></div>
+        <div id="pdur">00:00</div>
+        <div id="plive" class="hidden">CANLI</div>
+      </div>
+      <!-- v4.3: ekran üstü D-pad kontrolleri — hız/kalite/benzer/tam ekran
+           artık kumandanın renkli tuşlarına muhtaç değil -->
+      <div id="pbtns">
+        <div class="pbtn" data-pb="pause">Duraklat</div>
+        <div class="pbtn" data-pb="back10">-10sn</div>
+        <div class="pbtn" data-pb="fwd10">+10sn</div>
+        <div class="pbtn" data-pb="speed">Hız 1×</div>
+        <div class="pbtn" data-pb="quality">Kalite</div>
+        <div class="pbtn" data-pb="related">Benzer</div>
+        <div class="pbtn" data-pb="fs">Tam Ekran</div>
+        <div class="pbtn" data-pb="close">Kapat</div>
+      </div>
+      <div id="pquality"></div>
+    </div>
+
+    <!-- kalite / hız / benzer videolar listesi -->
+    <div id="poverlay" class="hidden">
+      <div id="pohead">Kalite</div>
+      <div id="polist"></div>
+      <div id="pohint">OK: seç &nbsp;·&nbsp; GERİ: kapat</div>
+    </div>
+  </div>
+
+  <!-- ============ ARAMA KLAVYESİ ============ -->
+  <div id="keyboard" class="hidden">
+    <div id="kbhead">
+      <div id="kbtitle">Arama</div>
+      <div id="kbquery"></div>
+    </div>
+    <div id="kgrid"></div>
+    <div id="kbhint">OK: harf seç &nbsp;·&nbsp; GERİ: sil &nbsp;·&nbsp; ARA ile bitir</div>
+  </div>
+
+  <!-- ============ YARDIM ============ -->
+  <div id="help" class="hidden">
+    <div id="helpbox">
+      <div id="helptitle">Yardım — Kumanda Tuşları</div>
+      <div id="helplist">
+        <div class="hrow"><span class="hk">OK / ENTER</span><span>Videoyu oynat · Oynatıcıda durdur/devam · Butonları seç</span></div>
+        <div class="hrow"><span class="hk">OK TUŞLARI</span><span>Izgara ve listelerde gezinme · Oynatıcıda ileri/geri sar</span></div>
+        <div class="hrow"><span class="hk">AŞAĞI (oynatıcı)</span><span>Ekran üstü kontrol butonlarını aç: hız, kalite, benzer, tam ekran</span></div>
+        <div class="hrow"><span class="hk">YUKARI (izgara)</span><span>Araç çubuğu: Ara, Trendler, Yardım</span></div>
+        <div class="hrow"><span class="hk">SAYI TUŞLARI</span><span>Izgara: 1=Ara 2=Trendler 3=Yardım · Oynatıcı: 1=Kalite 2=Hız 3=Benzer 4=Tam ekran</span></div>
+        <div class="hrow"><span class="hk">GERİ</span><span>Geri dön · Listeleri kapat · Oynatıcıdan listeye</span></div>
+        <div class="hrow"><span class="hk">RENKLİ TUŞLAR</span><span>Çalışıyorsa: kırmızı=ara/benzer, yeşil=trendler, sarı=yardım, mavi=kalite</span></div>
+        <div class="hrow"><span class="hk">PLAY·PAUSE·FF·RW</span><span>Medya tuşları (varsa) desteklenir</span></div>
+      </div>
+      <div id="helpnote">Sunucu: telefonda OrsayTube Mobil uygulaması açık olmalıdır. Bu sayfa http://telefon-adresi:8080/tv adresinden açılır.</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/js/tv.js?v=47"></script>
+</body>
+</html>
